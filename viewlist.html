@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Todo List App</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/static/viewlist.css">
+</head>
+
+<body>
+  <div class="container">
+    <div class="container_button">
+      <h2>Todo Application
+      </h2>
+      <a href="/index" class="backbutton"><span style='font-size:20px;'>&#8592;</span>Back </a>
+    </div>
+    <div class="lists">
+      {% for list in lists %}
+      <div class="list">
+        <div class="list_button">
+          <h3><span id="name{{ list.id }}" contenteditable="false">
+              {{ list.name }}
+            </span>
+            ({{ list.task_count }})</h3>
+          <div class="container_2">
+            <a type="button" id="btn{{ list.id }}" onclick="editList('{{ list.id }}')" class="btn" style="color: black;">
+              <b>Update</b>
+            </a>
+            <a href="/delete_list/{{ list.id }}" class="btn topdelete" style="color: black;"
+              onclick="return confirm('Delete this list and all its tasks?')">
+              Delete
+            </a>
+          </div>
+        </div>
+        <div class="status">
+          <div class="card">Total Tasks<br><b>{{ total_tasks }}</b></div>
+          <div class="card">Completed<br><b>{{ completed_tasks }}</b></div>
+        </div>
+        <form action="/add_task/{{ list.id }}" method="POST">
+          <input type="text" name="task" placeholder="Add task" required>
+          <button class="button">Add</button>
+        </form>
+        {% for task in list.tasks %}
+        <div class="task">
+          <span class="{% if task[3]=='Completed' %}done{% endif %}">
+            {{ task[2] }}
+          </span>
+          <span class="buttons">
+            {% if task[3] != 'Completed' %}
+            <a href="/complete/{{ task[0] }}/{{ list.id }}" class="btn">Pending</a>
+            {% elif task[3] == 'Completed' %}
+            <a href="/completed/{{ task[0] }}/{{ list.id }}" class="btn">Completed</a>
+            {% endif %}
+            <a href="/delete/{{ task[0] }}/{{ list.id }}" class="btn">Delete</a>
+          </span>
+        </div>
+        {% endfor %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  <script>
+    function editList(id) {
+      const name = document.getElementById(`name${id}`);
+      const btn = document.getElementById(`btn${id}`);
+      if (name.isContentEditable) {
+        const newName = name.innerText.trim();
+        fetch(`/api/update/${id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: newName })
+        })
+          .then(res => res.json())
+          .then(data => {
+            if (data.success) {
+              location.reload();
+            } else {
+              alert("Update failed");
+            }
+          });
+      }
+      else {
+        name.contentEditable = "true";
+        name.focus();
+        name.style.backgroundColor = "rgb(215, 152, 152)";
+        btn.innerText = "Save";
+      }
+    }
+  </script>
+
+</body>
+
+</html>
