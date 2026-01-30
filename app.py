@@ -373,6 +373,7 @@ def api_update(list_id):
     })
 
 
-if __name__ == '__main__':
-    init_db()
-    app.run(debug=True)
+# if __name__ == '__main__':
+#     init_db()
+#     app.run(debug=True)
+
